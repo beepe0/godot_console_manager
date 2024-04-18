@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://byssswptinsio"]
 
-[ext_resource type="Script" path="res://submodules/console_manager/GameConsole.cs" id="1_xvb74"]
-[ext_resource type="StyleBox" uid="uid://ctjcyl5035ru8" path="res://submodules/console_manager/style/ui/console_input_normal.tres" id="2_pvteo"]
+[ext_resource type="Script" path="res://addons/godot_console_manager/GameConsole.cs" id="1_xvb74"]
+[ext_resource type="StyleBox" uid="uid://ctjcyl5035ru8" path="res://addons/godot_console_manager/style/ui/console_input_normal.tres" id="2_pvteo"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fchul"]
 bg_color = Color(0, 0, 0, 0.313726)
