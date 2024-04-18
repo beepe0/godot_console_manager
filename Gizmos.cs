@@ -4,7 +4,7 @@
    using Godot;
    using System.Collections.Generic;
    
-   public sealed partial class DrawGizmos : Node
+   public sealed partial class Gizmos : Node
    {
       private static DebugGizmosLayers _allLayers = DebugGizmosLayers.Everythings;
       
@@ -21,6 +21,7 @@
       public static ushort TargetPoolSize => _targetPoolSize;
       public static ushort StartPoolSize => _startPoolSize;
       public static ulong Time => _time;
+      public static bool Enable = true;
 
       public static void SetDepthTest(bool doDepthTest)
       {
@@ -34,8 +35,8 @@
       {
          Name = "DebugGizmos";
 
-         _targetPoolSize = ProjectSettings.GetSetting(DrawGizmosPlugin.GeneralProperties["target_pool_size"].Path).AsUInt16();
-         _startPoolSize = ProjectSettings.GetSetting(DrawGizmosPlugin.GeneralProperties["start_pool_size"].Path).AsUInt16();
+         _targetPoolSize = ProjectSettings.GetSetting(GizmosPlugin.GeneralProperties["target_pool_size"].Path).AsUInt16();
+         _startPoolSize = ProjectSettings.GetSetting(GizmosPlugin.GeneralProperties["start_pool_size"].Path).AsUInt16();
 
          _canvasDrawer = new (this);
          _meshDrawer = new (this);
@@ -43,6 +44,7 @@
       public override void _PhysicsProcess(double delta)
       {
          _time = Godot.Time.GetTicksMsec();
+         
          _canvasDrawer.Update();
          _meshDrawer.Update();
       }
@@ -61,6 +63,10 @@
       public static void Arrow(Vector3 position, Quaternion rotation, Vector3 size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
       {
          _meshDrawer?.Arrow(position, rotation, size, duration, color, layer);
+      }
+      public static void Arrow(Vector3 position, Vector3 direction, float size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
+      {
+         _meshDrawer?.Arrow(position, new Quaternion(Basis.LookingAt(direction, Vector3.Right)) , Vector3.One * size, duration, color, layer);
       }
       public static void Circle(Vector3 position, Quaternion rotation, Vector3 size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
       {
@@ -190,6 +196,8 @@
       }
       public void Text(string text, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+         
          GizmosTextInstance instance = GizmosTextPool.Retrieve();
          if (instance != null)
          {
@@ -203,6 +211,8 @@
       }
       public void Text2D(string text, float duration, Vector2 position, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+         
          GizmosText2DInstance instance = GizmosText2dPool.Retrieve();
          if (instance != null)
          {
@@ -217,6 +227,8 @@
       }
       public void Text3D(string text, float duration, Vector3 position, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+         
          if (_camera == null)
          {
             _camera = _canvas3d.GetViewport().GetCamera3D();
@@ -307,9 +319,15 @@
             {
                continue;
             }
-            Vector2 offset = _textFont.GetStringSize(instance.Text, HorizontalAlignment.Left, -1f, _fontSize) * 0.5f;
-            Vector2 pos = camera.UnprojectPosition(instance.Position) - offset;
-            _canvas3d.DrawString(_textFont, pos, instance.Text, HorizontalAlignment.Left, -1, _fontSize, instance.Color);
+
+            
+            Vector3 dir1 = (camera.GlobalPosition - instance.Position).Normalized();
+            if (camera.GlobalPosition.DistanceTo(instance.Position) < 1000 && Mathf.RadToDeg(dir1.AngleTo(camera.GlobalBasis.Z)) < 100)
+            {
+               Vector2 offset = _textFont.GetStringSize(instance.Text, HorizontalAlignment.Left, -1f, _fontSize) * 0.5f;
+               Vector2 pos = camera.UnprojectPosition(instance.Position) - offset;
+               _canvas3d.DrawString(_textFont, pos, instance.Text, HorizontalAlignment.Left, -1, _fontSize, instance.Color);
+            }
             
             instance.BeenDrawn = true;
          }
@@ -354,19 +372,19 @@
          
          GizmosShapeCollection.OnReturn = (instance) => GizmosMeshPool.Return(instance);
 
-         _gizmosBoxCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["box_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
-         _gizmosArrowCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["arrow_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
-         _gizmosCircleCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["circle_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false, true));
-         _gizmosPlaneCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["plane_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false, true));
-         _gizmosSphereCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["sphere_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
-         _gizmosCapsuleCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["capsule_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
-         _gizmosCylinderCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["cylinder_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
-         _gizmosPointCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["point_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
-         _gizmosSolidBoxCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["solid_box_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
-         _gizmosArrowsCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["arrows_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
-         _gizmosSolidCapsuleCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["solid_capsule_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
-         _gizmosSolidCylinderCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["solid_cylinder_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
-         _gizmosSolidSphereCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(DrawGizmosPlugin.MeshesProperties["solid_sphere_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
+         _gizmosBoxCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["box_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
+         _gizmosArrowCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["arrow_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
+         _gizmosCircleCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["circle_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false, true));
+         _gizmosPlaneCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["plane_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false, true));
+         _gizmosSphereCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["sphere_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
+         _gizmosCapsuleCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["capsule_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
+         _gizmosCylinderCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["cylinder_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
+         _gizmosPointCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["point_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
+         _gizmosSolidBoxCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["solid_box_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
+         _gizmosArrowsCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["arrows_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
+         _gizmosSolidCapsuleCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["solid_capsule_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
+         _gizmosSolidCylinderCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["solid_cylinder_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
+         _gizmosSolidSphereCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["solid_sphere_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
 
          _gizmosShapeCollections = new[] 
          { 
@@ -416,54 +434,80 @@
       }
       public void Box(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosBoxCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void Arrow(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosArrowCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void Circle(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosCircleCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void Plane(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosPlaneCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void Sphere(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosSphereCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void Capsule(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosCapsuleCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void Cylinder(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosCylinderCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void Point(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosPointCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void SolidBox(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosSolidBoxCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void Arrows(Vector3 position, Quaternion rotation, Vector3 size, float duration, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosArrowsCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, null, layer));
       }
       public void SolidCapsule(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosSolidCapsuleCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void SolidCylinder(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosSolidCylinderCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void SolidSphere(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {
+         if(!Gizmos.Enable) return;
+
          _gizmosSolidSphereCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
       }
       public void Update()
@@ -577,8 +621,8 @@
       public GizmosInstancesPool()
       {
          _pool = new Queue<T>();
-         MaxSize = DrawGizmos.TargetPoolSize;
-         Expand(DrawGizmos.StartPoolSize);
+         MaxSize = Gizmos.TargetPoolSize;
+         Expand(Gizmos.StartPoolSize);
       }
       public bool Expand(ushort target)
       {
@@ -630,10 +674,10 @@
          ExpirationTime = default;
          BeenDrawn = default;
       }
-      public bool CantDraw() => ((DrawGizmos.AllLayers & DebugLayer) == 0 || DrawGizmos.Time > ExpirationTime && BeenDrawn);
+      public bool CantDraw() => ((Gizmos.AllLayers & DebugLayer) == 0 || Gizmos.Time > ExpirationTime && BeenDrawn);
       public void SetDuration(float duration)
       {
-         ExpirationTime = DrawGizmos.Time + (ulong)(duration * 1000.0f);
+         ExpirationTime = Gizmos.Time + (ulong)(duration * 1000.0f);
          BeenDrawn = false;
       }
    }

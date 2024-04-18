@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://djlq62r3smn6k"
-path="res://.godot/imported/gizmos.glb-a43585550983b029c6008cc2c51978db.scn"
+path="res://.godot/imported/gizmos.glb-8113e779f9a56036845d9a5190567687.scn"
 
 [deps]
 
-source_file="res://submodules/debug_draw_system/gizmos/gizmos.glb"
-dest_files=["res://.godot/imported/gizmos.glb-a43585550983b029c6008cc2c51978db.scn"]
+source_file="res://addons/godot_debug_draw_system/gizmos/gizmos.glb"
+dest_files=["res://.godot/imported/gizmos.glb-8113e779f9a56036845d9a5190567687.scn"]
 
 [params]
 
