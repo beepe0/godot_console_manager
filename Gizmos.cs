@@ -57,8 +57,16 @@
       #region Drawing Functions
 
       public static void Box(Vector3 position, Quaternion rotation, Vector3 size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
+      {         
+         _meshDrawer?.Box(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer);
+      }
+      public static void Box(Vector3 position, Vector3 size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
       {
-         _meshDrawer?.Box(position, rotation, size, duration, color, layer);
+         _meshDrawer?.Box(new Transform3D(Basis.Identity, position).ScaledLocal(size), duration, color, layer);
+      }
+      public static void Box(Transform3D transform3D, Vector3 size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
+      {
+         _meshDrawer?.Box(transform3D.ScaledLocal(size), duration, color, layer);
       }
       public static void Arrow(Vector3 position, Quaternion rotation, Vector3 size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
       {
@@ -66,7 +74,7 @@
       }
       public static void Arrow(Vector3 position, Vector3 direction, float size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
       {
-         _meshDrawer?.Arrow(position, new Quaternion(Basis.LookingAt(direction, Vector3.Right)) , Vector3.One * size, duration, color, layer);
+         _meshDrawer?.Arrow(position, new Quaternion(Basis.LookingAt(direction, Vector3.Up)) , Vector3.One * size, duration, color, layer);
       }
       public static void Circle(Vector3 position, Quaternion rotation, Vector3 size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
       {
@@ -111,6 +119,10 @@
       public static void SolidSphere(Vector3 position, Quaternion rotation, Vector3 size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
       {
          _meshDrawer?.SolidSphere(position, rotation, size, duration, color, layer);
+      }
+      public static void SolidSphere(Vector3 position, float size, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
+      {
+         _meshDrawer?.SolidSphere(position, Quaternion.Identity, Vector3.One * size, duration, color, layer);
       }
       public static void Text(object text, float duration = 0f, Color? color = null, DebugGizmosLayers layer = DebugGizmosLayers.Everythings)
       {
@@ -342,7 +354,7 @@
          GizmosText3dList?.Clear();
          _canvas2d?.Free();
          _canvas3d?.Free();
-         _textFont?.Free();
+         //_textFont?.Free();
       }
    }
 
@@ -380,8 +392,8 @@
          _gizmosCapsuleCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["capsule_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
          _gizmosCylinderCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["cylinder_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
          _gizmosPointCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Lines, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["point_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
-         _gizmosSolidBoxCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["solid_box_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
-         _gizmosArrowsCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["arrows_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
+         _gizmosSolidBoxCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["solid_box_mesh_res"].Path).ToString(), CreateStandardMaterial3D(false));
+         _gizmosArrowsCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["arrows_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
          _gizmosSolidCapsuleCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["solid_capsule_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
          _gizmosSolidCylinderCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["solid_cylinder_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
          _gizmosSolidSphereCollection = CreateGizmosShapeCollection(parent, Mesh.PrimitiveType.Triangles, ProjectSettings.GetSetting(GizmosPlugin.MeshesProperties["solid_sphere_mesh_res"].Path).ToString(), CreateStandardMaterial3D());
@@ -432,11 +444,11 @@
 
          return null;
       }
-      public void Box(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
+      public void Box(Transform3D transform3D, float duration, Color? color, DebugGizmosLayers layer)
       {
          if(!Gizmos.Enable) return;
 
-         _gizmosBoxCollection.Add(GetGizmosShape(new Transform3D(new Basis(rotation), position).ScaledLocal(size), duration, color, layer));
+         _gizmosBoxCollection.Add(GetGizmosShape(transform3D, duration, color, layer));
       }
       public void Arrow(Vector3 position, Quaternion rotation, Vector3 size, float duration, Color? color, DebugGizmosLayers layer)
       {

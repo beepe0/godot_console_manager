@@ -1,4 +1,5 @@
-﻿using Godot;
+﻿using BP.DebugGizmos;
+using Godot;
 
 [Tool]
 public partial class GizmosPlugin : EditorPlugin
@@ -37,7 +38,7 @@ public partial class GizmosPlugin : EditorPlugin
         {
             AddProjectSetting(property.Value.Path, property.Value.InitialValue, property.Value.VariantType, property.Value.PropertyHint);
         }
-
+        
         ProjectSettings.Save();
     }
     public override void _ExitTree()
