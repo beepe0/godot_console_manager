@@ -1,21 +1,12 @@
-﻿namespace BP
+﻿using System;
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+public class CommandAttribute : Attribute
 {
-    namespace GameConsole
+    public string KeyWord { get; set; }
+
+    public CommandAttribute(string keyWord)
     {
-        namespace Attribute
-        {
-            using System;
-
-            [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-            public class CommandAttribute : Attribute
-            {
-                public string KeyWord { get; set; }
-
-                public CommandAttribute(string keyWord)
-                {
-                    KeyWord = keyWord;
-                }
-            }
-        }
+        KeyWord = keyWord;
     }
 }

@@ -1,20 +1,11 @@
-﻿namespace BP
+﻿using Godot;
+public partial class Command : Node
 {
-    namespace GameConsole
+    public string CommandName { get; private set; }
+    public virtual void Initialize(string name)
     {
-        namespace Behaviour
-        {
-            using Godot;
-            public partial class Command : Node
-            {
-                public string CommandName { get; private set; }
-                public virtual void Initialize(string name)
-                {
-                    CommandName = name;
-                    CommandManager.Instance.AddChild(this);
-                }
-                public virtual void Execute(string[] keys) { }
-            }
-        }
+        CommandName = name;
+        CommandManager.Instance.AddChild(this);
     }
+    public virtual void Execute(string[] keys) { }
 }
