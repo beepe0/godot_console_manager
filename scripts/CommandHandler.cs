@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Godot;
 
 public class CommandHandler
@@ -96,7 +95,7 @@ public class CommandHandler
         Command command = GetCommand(keys[0]);
 
         Console.Debug($"-> {Console.SetColor(text, Colors.WebGray)}");
-        
+
         if (command != null) {
             command._Execute(keys, _recordData[command.Record]);
         } else {

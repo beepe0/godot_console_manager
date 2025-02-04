@@ -5,18 +5,19 @@
 [node name="Console" type="Node"]
 process_mode = 3
 
-[node name="Window" type="Window" parent="." node_paths=PackedStringArray("_richTextLabel", "_lineEdit")]
+[node name="ConsoleWindow" type="Window" parent="." node_paths=PackedStringArray("_richTextLabel", "_lineEdit")]
 transparent_bg = true
 title = "console"
 initial_position = 1
 size = Vector2i(900, 400)
+visible = false
 transparent = true
 min_size = Vector2i(900, 400)
 script = ExtResource("3_3op7d")
 _richTextLabel = NodePath("Control/MarginContainer/VBoxContainer/RichTextLabel")
 _lineEdit = NodePath("Control/MarginContainer/VBoxContainer/LineEdit")
 
-[node name="Control" type="Control" parent="Window"]
+[node name="Control" type="Control" parent="ConsoleWindow"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,7 +25,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="Window/Control"]
+[node name="MarginContainer" type="MarginContainer" parent="ConsoleWindow/Control"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -32,10 +33,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Window/Control/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="ConsoleWindow/Control/MarginContainer"]
 layout_mode = 2
 
-[node name="RichTextLabel" type="RichTextLabel" parent="Window/Control/MarginContainer/VBoxContainer"]
+[node name="RichTextLabel" type="RichTextLabel" parent="ConsoleWindow/Control/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 focus_mode = 2
@@ -45,7 +46,7 @@ context_menu_enabled = true
 selection_enabled = true
 deselect_on_focus_loss_enabled = false
 
-[node name="LineEdit" type="LineEdit" parent="Window/Control/MarginContainer/VBoxContainer"]
+[node name="LineEdit" type="LineEdit" parent="ConsoleWindow/Control/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 8
 virtual_keyboard_enabled = false
@@ -54,5 +55,5 @@ middle_mouse_paste_enabled = false
 deselect_on_focus_loss_enabled = false
 drag_and_drop_selection_enabled = false
 
-[connection signal="close_requested" from="Window" to="Window" method="_OnWindowCloseRequested"]
-[connection signal="window_input" from="Window" to="Window" method="_OnWindowInput"]
+[connection signal="close_requested" from="ConsoleWindow" to="ConsoleWindow" method="_OnWindowCloseRequested"]
+[connection signal="window_input" from="ConsoleWindow" to="ConsoleWindow" method="_OnWindowInput"]

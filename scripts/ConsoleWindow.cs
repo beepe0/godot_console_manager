@@ -17,8 +17,6 @@ public partial class ConsoleWindow : Window
 	[Export] private RichTextLabel _richTextLabel;
 	[Export] private LineEdit _lineEdit;
 
-	private string _onceText;
-
 	public override void _EnterTree() {
 		if (_instance == null) _instance = this;
         else QueueFree(); 
